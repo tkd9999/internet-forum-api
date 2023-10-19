@@ -3,20 +3,21 @@ package usecase
 import (
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/repository"
+	"github.com/junshintakeda/internet-forum/validator"
 )
 
 type IThreadUsecase interface {
 	GetAllThreads() ([]models.ThreadResponse, error)
-	GetThreadByID(threadId uint) (models.ThreadResponse, error)
 	CreateThread(thread models.Thread) (models.ThreadResponse, error)
 }
 
 type threadUsecase struct {
 	tr repository.IThreadRepository
+	tv validator.IThreadValidator
 }
 
-func NewThreadUsecase(tr repository.IThreadRepository) IThreadUsecase {
-	return &threadUsecase{tr}
+func NewThreadUsecase(tr repository.IThreadRepository, tv validator.IThreadValidator) IThreadUsecase {
+	return &threadUsecase{tr, tv}
 }
 
 func (tu *threadUsecase) GetAllThreads() ([]models.ThreadResponse, error) {
@@ -37,21 +38,10 @@ func (tu *threadUsecase) GetAllThreads() ([]models.ThreadResponse, error) {
 	return resThreads, nil
 }
 
-func (tu *threadUsecase) GetThreadByID(threadId uint) (models.ThreadResponse, error) {
-	thread := models.Thread{}
-	if err := tu.tr.GetThreadByID(&thread, threadId); err != nil {
+func (tu *threadUsecase) CreateThread(thread models.Thread) (models.ThreadResponse, error) {
+	if err := tu.tv.ThreadValidate(thread); err != nil {
 		return models.ThreadResponse{}, err
 	}
-	resThread := models.ThreadResponse{
-		ID:        thread.ID,
-		Title:     thread.Title,
-		CreatedAt: thread.CreatedAt,
-		UpdatedAt: thread.UpdatedAt,
-	}
-	return resThread, nil
-}
-
-func (tu *threadUsecase) CreateThread(thread models.Thread) (models.ThreadResponse, error) {
 	if err := tu.tr.CreateThread(&thread); err != nil {
 		return models.ThreadResponse{}, err
 	}

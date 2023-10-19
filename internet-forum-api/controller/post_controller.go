@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/usecase"
@@ -20,19 +21,25 @@ type IPostController interface {
 
 type postController struct {
 	pu usecase.IPostUsecase
+	tu usecase.IThreadUsecase
 }
 
-func NewPostController(pu usecase.IPostUsecase) IPostController {
-	return &postController{pu}
+func NewPostController(pu usecase.IPostUsecase, tu usecase.IThreadUsecase) IPostController {
+	return &postController{pu, tu}
 }
 
 func (pc *postController) GetAllPosts(c echo.Context) error {
 	threadId := c.Param("threadId")
-	threads, err := pc.pu.GetAllPosts(threadId)
+	posts, err := pc.pu.GetAllPosts(threadId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK, threads)
+
+	thread, err := pc.tu.GetThreadByID(threadId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"posts": posts, "thread": thread})
 }
 
 func (pc *postController) GetPostByID(c echo.Context) error {
@@ -45,7 +52,9 @@ func (pc *postController) GetPostByID(c echo.Context) error {
 }
 
 func (pc *postController) GetPostsByUserID(c echo.Context) error {
-	userId := c.Param("userId")
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["user_id"]
 	posts, err := pc.pu.GetPostsByUserID(userId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -74,11 +83,12 @@ func (pc *postController) CreatePost(c echo.Context) error {
 
 func (pc *postController) UpdatePost(c echo.Context) error {
 	postId := c.Param("postId")
+	PostId, _ := strconv.Atoi(postId)
 	post := models.Post{}
 	if err := c.Bind(&post); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	postRes, err := pc.pu.UpdatePost(postId, post)
+	postRes, err := pc.pu.UpdatePost(PostId, post)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

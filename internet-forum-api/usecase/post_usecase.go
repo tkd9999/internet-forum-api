@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/repository"
+	"github.com/junshintakeda/internet-forum/validator"
 )
 
 type IPostUsecase interface {
@@ -16,10 +17,11 @@ type IPostUsecase interface {
 
 type postUsecase struct {
 	pr repository.IPostRepository
+	pv validator.IPostValidator
 }
 
-func NewPostUsecase(pr repository.IPostRepository) IPostUsecase {
-	return &postUsecase{pr}
+func NewPostUsecase(pr repository.IPostRepository, pv validator.IPostValidator) IPostUsecase {
+	return &postUsecase{pr, pv}
 }
 
 func (pu *postUsecase) GetAllPosts(threadId uint) ([]models.PostResponse, err) {
@@ -76,6 +78,9 @@ func (pu *postUsecase) GetPostByUserID(userId uint) (models.PostResponse, error)
 }
 
 func (pu *postUsecase) CreatePost(post models.Post) (models.PostResponse, error) {
+	if err := pu.pv.PostValidate(post); err != nil {
+		return models.PostResponse{}, err
+	}
 	if err := pu.pr.CreatePost(&post); err != nil {
 		return models.PostResponse{}, err
 	}
@@ -90,6 +95,9 @@ func (pu *postUsecase) CreatePost(post models.Post) (models.PostResponse, error)
 }
 
 func (pu *postUsecase) UpdatePost(post models.Post, postId uint) (models.PostResponse, error) {
+	if err := pu.pv.PostValidate(post); err != nil {
+		return models.PostResponse{}, err
+	}
 	if err := pu.pr.UpdatePost(&post, postId); err != nil {
 		return models.PostResponse{}, err
 	}

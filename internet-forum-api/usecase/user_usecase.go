@@ -5,6 +5,7 @@ import (
 
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/repository"
+	"github.com/junshintakeda/internet-forum/validator"
 
 	"time"
 
@@ -19,13 +20,17 @@ type IUserUsecase interface {
 
 type userUsecase struct {
 	ur repository.IUserRepository
+	uv validator.IUserValidator
 }
 
-func NewUserUsecase(ur repository.IUserRepository) IUserUsecase {
-	return &userUsecase{ur}
+func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
+	return &userUsecase{ur, uv}
 }
 
 func (uu *userUsecase) SignUp(user models.User) (models.UserResponse, error) {
+	if err := uu.uv.UserValidate(user); err != nil {
+		return models.UserResponse{}, err
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
 		return models.UserResponse{}, err
@@ -43,6 +48,9 @@ func (uu *userUsecase) SignUp(user models.User) (models.UserResponse, error) {
 }
 
 func (uu *userUsecase) Login(user models.User) (string, error) {
+	if err := uu.uv.UserValidate(user); err != nil {
+		return "", err
+	}
 	storedUser := models.User{}
 	if err := uu.ur.GetUserByEmail(&storedUser, user.Email); err != nil {
 		return "", err
