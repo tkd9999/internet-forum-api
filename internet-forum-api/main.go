@@ -6,6 +6,7 @@ import (
 	"github.com/junshintakeda/internet-forum/repository"
 	"github.com/junshintakeda/internet-forum/router"
 	"github.com/junshintakeda/internet-forum/usecase"
+	"github.com/junshintakeda/internet-forum/validator"
 )
 
 func main() {
@@ -13,9 +14,12 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	threadRepository := repository.NewThreadRepository(db)
 	postRepository := repository.NewPostRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository)
-	threadUsecase := usecase.NewThreadUsecase(threadRepository)
-	postUsecase := usecase.NewPostUsecase(postRepository)
+	userValidator := validator.NewUserValidator()
+	threadValidator := validator.NewThreadValidator()
+	postValidator := validator.NewPostValidator()
+	userUsecase := usecase.NewUserUsecase(userRepository, userValidator)
+	threadUsecase := usecase.NewThreadUsecase(threadRepository, threadValidator)
+	postUsecase := usecase.NewPostUsecase(postRepository, postValidator)
 	userController := controller.NewUserController(userUsecase)
 	threadController := controller.NewThreadController(threadUsecase)
 	postController := controller.NewPostController(postUsecase, threadUsecase)

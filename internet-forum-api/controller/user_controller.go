@@ -2,8 +2,6 @@ package controller
 
 import (
 	"net/http"
-
-	"net/http"
 	"os"
 	"time"
 
@@ -17,7 +15,6 @@ type IUserController interface {
 	SignUp(c echo.Context) error
 	LogIn(c echo.Context) error
 	LogOut(c echo.Context) error
-	CsrfToken(c echo.Context) error
 }
 
 type userController struct {
@@ -75,11 +72,4 @@ func (uc *userController) LogOut(c echo.Context) error {
 	cookie.SameSite = http.SameSiteNoneMode
 	c.SetCookie(cookie)
 	return c.NoContent(http.StatusOK)
-}
-
-func (uc *userController) CsrfToken(c echo.Context) error {
-	token := c.Get("csrf").(string)
-	return c.JSON(http.StatusOK, echo.Map{
-		"csrf_token": token,
-	})
 }

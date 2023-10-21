@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	db := db.NewDB()
-	defer db.Close()
+	dbConn := db.NewDB()
+	defer db.CloseDB(dbConn)
 
-	db.AutoMigrate(&models.User{}, &models.Thread{}, &models.Post{})
+	dbConn.AutoMigrate(&models.User{}, &models.Thread{}, &models.Post{})
 
 	fmt.Println("Migrated")
 }

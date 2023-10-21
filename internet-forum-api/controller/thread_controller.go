@@ -2,10 +2,12 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/usecase"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +18,7 @@ type IThreadController interface {
 }
 
 type threadController struct {
-	tc usecase.IThreadUsecase
+	tu usecase.IThreadUsecase
 }
 
 func NewThreadController(tc usecase.IThreadUsecase) IThreadController {
@@ -24,7 +26,7 @@ func NewThreadController(tc usecase.IThreadUsecase) IThreadController {
 }
 
 func (tc *threadController) GetAllThreads(c echo.Context) error {
-	threads, err := tc.tc.GetAllThreads()
+	threads, err := tc.tu.GetAllThreads()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -32,8 +34,9 @@ func (tc *threadController) GetAllThreads(c echo.Context) error {
 }
 
 func (tc *threadController) GetThreadByID(c echo.Context) error {
-	threadId := c.Param("threadId")
-	thread, err := tc.tc.GetThreadByID(threadId)
+	ThreadId := c.Param("threadId")
+	threadId, _ := strconv.Atoi(ThreadId)
+	thread, err := tc.tu.GetThreadByID(uint(threadId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -49,8 +52,8 @@ func (tc *threadController) CreateThread(c echo.Context) error {
 	if err := c.Bind(&thread); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	thread.UserId = uint(userId.(float64))
-	threadRes, err := tc.tc.CreateThread(thread)
+	thread.UserID = uint(userId.(float64))
+	threadRes, err := tc.tu.CreateThread(thread)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

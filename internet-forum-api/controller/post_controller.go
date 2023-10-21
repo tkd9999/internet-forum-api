@@ -7,6 +7,7 @@ import (
 	"github.com/junshintakeda/internet-forum/models"
 	"github.com/junshintakeda/internet-forum/usecase"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,13 +30,14 @@ func NewPostController(pu usecase.IPostUsecase, tu usecase.IThreadUsecase) IPost
 }
 
 func (pc *postController) GetAllPosts(c echo.Context) error {
-	threadId := c.Param("threadId")
-	posts, err := pc.pu.GetAllPosts(threadId)
+	ThreadId := c.Param("threadId")
+	threadId, _ := strconv.Atoi(ThreadId)
+	posts, err := pc.pu.GetAllPosts(uint(threadId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	thread, err := pc.tu.GetThreadByID(threadId)
+	thread, err := pc.tu.GetThreadByID(uint(threadId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -43,8 +45,9 @@ func (pc *postController) GetAllPosts(c echo.Context) error {
 }
 
 func (pc *postController) GetPostByID(c echo.Context) error {
-	postId := c.Param("postId")
-	post, err := pc.pu.GetPostByID(postId)
+	PostId := c.Param("postId")
+	postId, _ := strconv.Atoi(PostId)
+	post, err := pc.pu.GetPostByID(uint(postId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -55,7 +58,7 @@ func (pc *postController) GetPostsByUserID(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
-	posts, err := pc.pu.GetPostsByUserID(userId)
+	posts, err := pc.pu.GetPostByUserID(uint(userId.(float64)))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -63,7 +66,8 @@ func (pc *postController) GetPostsByUserID(c echo.Context) error {
 }
 
 func (pc *postController) CreatePost(c echo.Context) error {
-	threadId := c.Param("threadId")
+	ThreadId := c.Param("threadId")
+	threadId, _ := strconv.Atoi(ThreadId)
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["user_id"]
@@ -82,13 +86,13 @@ func (pc *postController) CreatePost(c echo.Context) error {
 }
 
 func (pc *postController) UpdatePost(c echo.Context) error {
-	postId := c.Param("postId")
-	PostId, _ := strconv.Atoi(postId)
+	PostId := c.Param("postId")
+	postId, _ := strconv.Atoi(PostId)
 	post := models.Post{}
 	if err := c.Bind(&post); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	postRes, err := pc.pu.UpdatePost(PostId, post)
+	postRes, err := pc.pu.UpdatePost(post, uint(postId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -96,8 +100,9 @@ func (pc *postController) UpdatePost(c echo.Context) error {
 }
 
 func (pc *postController) DeletePost(c echo.Context) error {
-	postId := c.Param("postId")
-	if err := pc.pu.DeletePost(postId); err != nil {
+	PostId := c.Param("postId")
+	postId, _ := strconv.Atoi(PostId)
+	if err := pc.pu.DeletePost(uint(postId)); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.NoContent(http.StatusOK)

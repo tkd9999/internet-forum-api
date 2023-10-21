@@ -24,7 +24,7 @@ func NewPostUsecase(pr repository.IPostRepository, pv validator.IPostValidator) 
 	return &postUsecase{pr, pv}
 }
 
-func (pu *postUsecase) GetAllPosts(threadId uint) ([]models.PostResponse, err) {
+func (pu *postUsecase) GetAllPosts(threadId uint) ([]models.PostResponse, error) {
 	posts := []models.Post{}
 	if err := pu.pr.GetAllPosts(&posts, threadId); err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (pu *postUsecase) GetPostByID(postId uint) (models.PostResponse, error) {
 	return resPost, nil
 }
 
-func (pu *postUsecase) GetPostByUserID(userId uint) (models.PostResponse, error) {
+func (pu *postUsecase) GetPostByUserID(userId uint) ([]models.PostResponse, error) {
 	posts := []models.Post{}
 	if err := pu.pr.GetPostByUserID(&posts, userId); err != nil {
 		return nil, err

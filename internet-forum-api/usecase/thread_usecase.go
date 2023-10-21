@@ -8,6 +8,7 @@ import (
 
 type IThreadUsecase interface {
 	GetAllThreads() ([]models.ThreadResponse, error)
+	GetThreadByID(threadId uint) (models.ThreadResponse, error)
 	CreateThread(thread models.Thread) (models.ThreadResponse, error)
 }
 
@@ -36,6 +37,20 @@ func (tu *threadUsecase) GetAllThreads() ([]models.ThreadResponse, error) {
 		resThreads = append(resThreads, t)
 	}
 	return resThreads, nil
+}
+
+func (tu *threadUsecase) GetThreadByID(threadId uint) (models.ThreadResponse, error) {
+	thread := models.Thread{}
+	if err := tu.tr.GetThreadByID(&thread, threadId); err != nil {
+		return models.ThreadResponse{}, err
+	}
+	resThread := models.ThreadResponse{
+		ID:        thread.ID,
+		Title:     thread.Title,
+		CreatedAt: thread.CreatedAt,
+		UpdatedAt: thread.UpdatedAt,
+	}
+	return resThread, nil
 }
 
 func (tu *threadUsecase) CreateThread(thread models.Thread) (models.ThreadResponse, error) {
