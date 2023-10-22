@@ -48,5 +48,5 @@ GO_ENV=dev go run main.go
 ```
 
 ## Refernces
-https://github.com/GomaGoma676/echo-rest-api
-https://github.com/eldimious/golang-api-showcase
+1. https://github.com/GomaGoma676/echo-rest-api
+2. https://github.com/eldimious/golang-api-showcase
