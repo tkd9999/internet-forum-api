@@ -2,6 +2,7 @@
 インターネット掲示板RestAPI(Go/Echo)をクリーンアーキテクチャで実装
 
 ## Architecture
+```
 ├── docker-compose.yml
 ├── go.mod
 ├── go.sum
@@ -32,6 +33,7 @@
     ├── post_validator.go
     ├── thread_validator.go
     └── user_validator.go
+```
 
 ## Usage
 ```
