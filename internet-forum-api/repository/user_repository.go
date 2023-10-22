@@ -8,7 +8,7 @@ import (
 
 type IUserRepository interface {
 	GetUserByEmail(user *models.User, email string) error
-	GetUserByUserName(users []*models.User, userName string) error
+	GetUserByUserName(users *[]models.User, userName string) error
 	CreateUser(user *models.User) error
 	DeleteUser(userId uint) error
 }
@@ -28,7 +28,7 @@ func (ur *userrepository) GetUserByEmail(user *models.User, email string) error 
 	return nil
 }
 
-func (ur *userrepository) GetUserByUserName(users []*models.User, userName string) error {
+func (ur *userrepository) GetUserByUserName(users *[]models.User, userName string) error {
 	if err := ur.db.Where("user_name=?", userName).Find(users).Error; err != nil {
 		return err
 	}
