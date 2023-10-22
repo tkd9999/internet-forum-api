@@ -1,5 +1,5 @@
 # internet-forum-api
-インターネット掲示板RestAPI(Go/Echo)をクリーンアーキテクチャで実装
+インターネット掲示板RestAPI(Go/Echo)をクリーンアーキテクチャで実装（詳細について記事作成予定）
 
 ## Architecture
 ```
